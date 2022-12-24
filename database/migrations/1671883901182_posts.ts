@@ -8,13 +8,13 @@ export default class extends BaseSchema {
       table.increments('id')
       table.integer('user_id').unsigned().references('id').inTable('users')
       table.integer('parent_id').nullable()
-      table.string('title').nullable()
       table.string('slug').notNullable()
-      table.text('body').nullable()
-      table.timestamp('published_at', { useTz: true })
-
+      table.string('title').nullable()
+      table.text('content').nullable()
+      table.boolean("is_active").defaultTo(0)
       table.string('meta_title').nullable()
       table.text('meta_description').nullable()
+      table.timestamp('published_at', { useTz: true })
 
       /**
        * Uses timestamptz for PostgreSQL and DATETIME2 for MSSQL
