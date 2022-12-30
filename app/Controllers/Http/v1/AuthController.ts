@@ -11,7 +11,13 @@ export default class AuthController {
             expiresIn: "1 days",
         });
 
-        return token.toJSON();
+        return {
+            data: {
+                user: auth.user,
+                token: token
+            },
+            message: 'Login success',
+        };
     }
 
     public async register({ request, auth }: HttpContextContract) {
@@ -34,6 +40,12 @@ export default class AuthController {
             expiresIn: "1 days",
         });
 
-        return token.toJSON();
+        return {
+            data: {
+                user: auth.user,
+                token: token
+            },
+            message: 'Register success',
+        };
     }
 }

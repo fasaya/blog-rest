@@ -23,3 +23,18 @@ import Route from '@ioc:Adonis/Core/Route'
 Route.get('/', async () => {
   return { hello: 'world' }
 })
+
+
+Route.group(() => {
+
+  Route.post("register", "v1/AuthController.register");
+  Route.post("login", "v1/AuthController.login");
+
+  Route.group(() => {
+    Route.get("posts", "PostsController.index");
+    Route.get("posts/:id", "PostsController.show");
+    Route.put("posts/update", "PostsController.update");
+    Route.post("posts", "PostsController.store");
+  }).middleware("auth:api");
+
+}).prefix("v1");
