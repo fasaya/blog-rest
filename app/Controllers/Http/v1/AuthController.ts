@@ -1,8 +1,9 @@
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import User from "App/Models/User";
+import RegisterValidator from "App/Validators/RegisterValidator";
 
 export default class AuthController {
-    public async login({ request, auth }: HttpContextContract) {
+    public async login({ request, auth, response }: HttpContextContract) {
 
         const email = request.input("email");
         const password = request.input("password");
@@ -11,16 +12,17 @@ export default class AuthController {
             expiresIn: "1 days",
         });
 
-        return {
+        return response.ok({
             data: {
                 user: auth.user,
                 token: token
             },
             message: 'Login success',
-        };
+        })
     }
 
-    public async register({ request, auth }: HttpContextContract) {
+    public async register({ request, auth, response }: HttpContextContract) {
+        const payload = await request.validate(RegisterValidator);
 
         const email = request.input("email");
         const password = request.input("password");
