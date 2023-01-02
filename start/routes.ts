@@ -27,14 +27,15 @@ Route.get('/', async () => {
 
 Route.group(() => {
 
-  Route.post("register", "v1/AuthController.register");
-  Route.post("login", "v1/AuthController.login");
+  Route.post("register", "AuthController.register");
+  Route.post("login", "AuthController.login");
+
+  Route.get("posts", "PostsController.index");
+  Route.get("posts/:slug", "PostsController.show");
 
   Route.group(() => {
-    Route.get("posts", "PostsController.index");
-    Route.get("posts/:id", "PostsController.show");
-    Route.put("posts/update", "PostsController.update");
+    Route.put("posts/:slug", "PostsController.update");
     Route.post("posts", "PostsController.store");
   }).middleware("auth:api");
 
-}).prefix("v1");
+}).namespace('App/Controllers/Http/v1').prefix("v1");

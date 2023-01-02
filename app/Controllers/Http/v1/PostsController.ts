@@ -3,42 +3,42 @@ import Post from 'App/Models/Post';
 
 export default class PostsController {
 
-    public async index({ request }: HttpContextContract) {
-        const posts = await Post.query();
-        return posts
+    public async index({ request, response }: HttpContextContract) {
+        const posts = await Post.query().paginate(request.input('page', 1), 10);
+        return response.ok({ data: posts, message: 'success', })
     }
 
-    public async show({ request, params }: HttpContextContract) {
-        try {
-            const post = await Post.find(params.id);
-            if (post) {
-                return post
-            }
-        } catch (error) {
-            console.log(error)
+    public async show({ params, response }: HttpContextContract) {
+        const post = await Post.query().where('slug', params.slug).first();
+        if (post) {
+            return response.ok({ data: post, message: 'success' })
         }
+        return response.notFound({ message: 'Not found' })
     }
 
-    public async update({ auth, request, params }: HttpContextContract) {
-        const post = await Post.find(params.id);
+    public async update({ params, response, request }: HttpContextContract) {
+        const input = request.all();
+
+        const post = await Post.query().where('slug', params.slug).first();
         if (post) {
             post.title = request.input('title');
-            post.content = request.input('desc');
-            post.done = request.input('done')
+            post.content = request.input('content');
 
             if (await post.save()) {
-                return post
+                return response.ok({
+                    data: post,
+                    message: 'success',
+                })
             }
-            return; // 422
         }
-        return; // 401
+        return response.notFound({ message: 'Not found' })
     }
 
-    public async store({ auth request, response }: HttpContextContract) {
+    public async store({ auth, request, response }: HttpContextContract) {
         const user = await auth.authenticate();
         const post = new Post();
         post.title = request.input('title');
-        post.desc = request.input('desc');
+        // post.desc = request.input('desc');
         await post.save(post)
         return post
     }
