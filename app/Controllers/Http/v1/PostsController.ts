@@ -1,5 +1,6 @@
 import { HttpContextContract } from "@ioc:Adonis/Core/HttpContext";
 import Post from 'App/Models/Post';
+import PostValidator from "App/Validators/PostValidator";
 
 export default class PostsController {
 
@@ -17,12 +18,13 @@ export default class PostsController {
     }
 
     public async update({ params, response, request }: HttpContextContract) {
+        const payload = await request.validate(PostValidator);
         const input = request.all();
 
         const post = await Post.query().where('slug', params.slug).first();
         if (post) {
-            post.title = request.input('title');
-            post.content = request.input('content');
+            post.title = input.title;
+            post.content = input.content;
 
             if (await post.save()) {
                 return response.ok({
@@ -35,17 +37,33 @@ export default class PostsController {
     }
 
     public async store({ auth, request, response }: HttpContextContract) {
-        const user = await auth.authenticate();
+        const payload = await request.validate(PostValidator);
+        const user = auth.use("api").user;
+
         const post = new Post();
+        post.user_id = user.id;
         post.title = request.input('title');
-        // post.desc = request.input('desc');
-        await post.save(post)
-        return post
+        post.slug = request.input('slug');
+        post.content = request.input('content');
+        if (await post.save()) {
+            return response.ok({
+                data: post,
+                message: 'success',
+            })
+        }
+        return response.notFound({ message: 'Not found' })
     }
 
     public async destroy({ response, auth, request, params }: HttpContextContract) {
-        const user = await auth.authenticate();
-        const post = await Post.query().where('id', params.id).delete();
-        return response.json({ message: "Deleted successfully" })
+
+        const post = Post.query()
+            .where('slug', params.slug)
+            .where('user_id', auth.use("api").user.id);
+
+        if (await post.first() && await post.delete()) {
+            return response.ok({ message: 'Deleted successfully', })
+        }
+
+        return response.notFound({ message: 'Not found' })
     }
 }

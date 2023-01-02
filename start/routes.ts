@@ -36,6 +36,7 @@ Route.group(() => {
   Route.group(() => {
     Route.put("posts/:slug", "PostsController.update");
     Route.post("posts", "PostsController.store");
+    Route.delete("posts/:slug", "PostsController.destroy");
   }).middleware("auth:api");
 
 }).namespace('App/Controllers/Http/v1').prefix("v1");
